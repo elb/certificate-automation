@@ -1,64 +1,56 @@
 #!/bin/bash
 
-hr="-------------------------------------------"
-br=""
-strength=1024
-valid=365
-
-message="Usage:  sh make_server_cert.sh [your_server_name@yourdomain.com]"
+HR="-------------------------------------------"
+BR=""
+VALID=3650
+OPENSSL_BIN=/usr/local/bin/openssl
+OPENSSL_CNF=./conf/ca_openssl.cnf
+OPENSSL_CURVE=prime256v1
+MESSAGE="Usage:  sh ${0} [your_server_name]"
 
 if [ $# -ne 1 ];
 then
-	echo $message
+	echo ${MESSAGE}
 	exit 2
 fi
 
-if [ $1 = "--help" ];
+if [ ${1} = "--help" ];
 then
-	echo $message
+	echo ${MESSAGE}
 	exit 2
 fi
 
 if [ ! -d ./server/ ];
 then
 	echo "Creating Server folder: server/"
-	mkdir ./server/
-	mkdir ./server/keys/
-	mkdir ./server/certificates/
-	mkdir ./server/requests/
+	mkdir -p ./server/keys/
+	mkdir -p ./server/certificates/
+	mkdir -p ./server/requests/
 fi
 
-export OPENSSL_CONF=./conf/server_openssl.cnf
+CA_KEY=./ca/ca.key
+CA_CRT=./ca/ca.crt.pem
 
-server=$1
-sk=./server/keys/$server.key
-sr=./server/requests/$server.csr
-sc=./server/certificates/$server.crt
+SERVER=${1}
+SERVER_KEY=./server/keys/${SERVER}.key
+SERVER_CSR=./server/requests/${SERVER}.csr
+SERVER_CRT=./server/certificates/${SERVER}.crt
 
-echo $br
-echo $hr
+echo ${BR}
+echo ${HR}
 echo "CREATING SERVER KEY"
-echo $hr
+echo ${HR}
+${OPENSSL_BIN} ecparam -out ${SERVER_KEY} -outform PEM -name ${OPENSSL_CURVE} -genkey
 
-openssl genrsa -des3 -out $sk $strength
-
-echo $br
-echo $hr
+echo ${BR}
+echo ${HR}
 echo "CREATING SERVER CERTIFICATE REQUEST"
-echo $hr
+echo ${HR}
+${OPENSSL_BIN} req -config ${OPENSSL_CNF} -newkey ec:${CA_CRT} -keyout ${SERVER_KEY} -out ${SERVER_CSR}
 
-openssl req -new -key $sk -out $sr
-
-echo $br
-echo $hr
+echo ${BR}
+echo ${HR}
 echo "CA SIGNING AND ISSUING SERVER CERTIFICATE"
-echo $hr
-
-openssl x509 -req -in $sr -out $sc -CA ./ca/ca.crt -CAkey ./ca/ca.key -CAcreateserial -days $valid
-
-echo $br
-echo $hr
-echo "DUMPING CERTIFICATE TO CONSOLE"
-echo $hr
-
-openssl x509 -in $sc -text -noout
+echo ${HR}
+${OPENSSL_BIN} x509 -CA ${CA_CRT} -CAkey ${CA_KEY} -CAcreateserial -days ${VALID} -req -in ${SERVER_CSR} -out ${SERVER_CRT}
+rm ${SERVER_CSR}

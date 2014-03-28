@@ -1,73 +1,65 @@
 #!/bin/bash
 
-hr="-------------------------------------------"
-br=""
-strength=1024
-valid=365
-
-message="Usage:  sh new_client_cert.sh [client_name@yourdomain.com]"
+HR="-------------------------------------------"
+BR=""
+VALID=3650
+OPENSSL_BIN=/usr/local/bin/openssl
+OPENSSL_CNF=./conf/ca_openssl.cnf
+OPENSSL_CURVE=prime256v1
+MESSAGE="Usage:  sh ${0} [client_name]"
 
 if [ $# -ne 1 ];
 then
-	echo $message
+	echo ${MESSAGE}
 	exit 2
 fi
 
 if [ $1 = "--help" ];
 then
-	echo $message
+	echo ${MESSAGE}
 	exit 2
 fi
 
 if [ ! -d ./user/ ];
 then
 	echo "Creating User folder: user/"
-	mkdir ./user/
-	mkdir ./user/keys/
-	mkdir ./user/requests/
-	mkdir ./user/certificates/
-	mkdir ./user/p12/
+	mkdir -p ./user/keys/
+	mkdir -p ./user/requests/
+	mkdir -p ./user/certificates/
+	mkdir -p ./user/p12/
 fi
 
-export OPENSSL_CONF=./conf/client_openssl.cnf
+CA_KEY=./ca/ca.key
+CA_CRT=./ca/ca.crt.pem
 
-user=$1
-uk=./user/keys/$user.key
-ur=./user/requests/$user.csr
-uc=./user/certificates/$user.crt
-up=./user/p12/$user.p12
+USER=${1}
+USER_KEY=./user/keys/${USER}.key
+USER_CSR=./user/requests/${USER}.csr
+USER_CRT=./user/certificates/${USER}.crt
+USER_P12=./user/p12/${USER}.p12
 
-echo $br
-echo $hr
+echo ${BR}
+echo ${HR}
 echo "CREATING CLIENT KEY"
-echo $hr
+echo ${HR}
+${OPENSSL_BIN} ecparam -out ${USER_KEY} -outform PEM -name ${OPENSSL_CURVE} -genkey
 
-openssl genrsa -des3 -out $uk $strength
 
-echo $br
-echo $hr
+echo ${BR}
+echo ${HR}
 echo "CREATING CLIENT CERTIFICATE REQUEST"
-echo $hr
+echo ${HR}
+${OPENSSL_BIN} req -config ${OPENSSL_CNF} -newkey ec:${CA_CRT} -keyout ${USER_KEY} -out ${USER_CSR}
 
-openssl req -new -key $uk -out $ur
-
-echo $br
-echo $hr
+echo ${BR}
+echo ${HR}
 echo "CA SIGNING AND ISSUING CLIENT CERTIFICATE"
-echo $hr
-
-openssl x509 -req -in $ur -out $uc -CA ./ca/ca.crt -CAkey ./ca/ca.key -CAcreateserial -days $valid
+echo ${HR}
+${OPENSSL_BIN} x509 -CA ${CA_CRT} -CAkey ${CA_KEY} -CAcreateserial -days ${VALID} -req -in ${USER_CSR} -out ${USER_CRT}
+rm ${USER_CSR}
 
 echo $br
 echo $hr
 echo "CREATING A PKCS#12 CERTIFICATE FOR BROWSER"
 echo $hr
-
-openssl pkcs12 -export -clcerts -in $uc -inkey $uk -out $up
-
-echo $br
-echo $hr
-echo "DUMPING CERTIFICATE TO CONSOLE"
-echo $hr
-
-openssl x509 -in $uc -text -noout
+${OPENSSL_BIN} pkcs12 -export -clcerts -in ${USER_CRT} -inkey ${USER_KEY} -out ${USER_P12}

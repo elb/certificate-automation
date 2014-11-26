@@ -3,14 +3,17 @@ certificate-automation
 
 Simple scripts designed to automate the OpenSSL CA and certificate issuing process.
 
+## Customization
+
+Copy the `conf/openssl.cnf.dist` to `conf/openssl.cnf` and customize to fit your needs
 
 ### Create a Certificate Authority (key and self-signed cert):
 
 1.  Execute on command line.
 
-```bash
-sh setup_certauth.sh
-```
+    `bash
+    sh setup_certauth.sh`
+
 
 2.  Follow on-screen steps.
 
@@ -18,9 +21,9 @@ sh setup_certauth.sh
 
 1.  Execute on command line.
 
-```bash
-sh make_server_cert.sh <server-name>
-```
+    ```bash
+    sh make_server_cert.sh <server-name>
+    ```
 
 2.  Follow on-screen steps.
 
@@ -28,8 +31,8 @@ sh make_server_cert.sh <server-name>
 
 1.  Execute on command line.
 
-```bash
-sh new_client_cert.sh <client-name>
-```
+    ```bash
+    sh new_client_cert.sh <client-name>
+    ```
 
 2.  Follow on-screen steps.

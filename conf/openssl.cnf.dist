@@ -34,7 +34,7 @@ commonName                     = supplied
 emailAddress                   = optional
 
 [ req ]
-                                                # prompt                        = no
+# prompt                       = no
 default_bits                   = 4096           # Size of keys
 default_keyfile                = $dir/ca/ca.key # name of generated keys
 default_md                     = default        # message digest algorithm
@@ -57,6 +57,13 @@ countryName_min                = 2
 countryName_max                = 2
 commonName                     = Common Name (Computer Name, Server, or Username)
 commonName_max                 = 64
+
+[ req_attributes ]
+challengePassword               = A challenge password
+challengePassword_min           = 4
+challengePassword_max           = 20
+
+unstructuredName                = An optional company name
 
 # Default values for the above, for consistency and less typing.
 # Variable name                    Value

@@ -3,8 +3,8 @@
 hr="-------------------------------------------"
 br=""
 VALID=3650
-OPENSSL_BIN=/usr/local/bin/openssl
-OPENSSL_CNF=./conf/ca_openssl.cnf
+OPENSSL_BIN=`which openssl`
+OPENSSL_CNF=./conf/openssl.cnf
 
 CA_KEY=./ca/ca.key
 CA_CRT=./ca/ca.crt.pem

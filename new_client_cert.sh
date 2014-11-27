@@ -3,8 +3,8 @@
 HR="-------------------------------------------"
 BR=""
 VALID=3650
-OPENSSL_BIN=/usr/local/bin/openssl
-OPENSSL_CNF=./conf/ca_openssl.cnf
+OPENSSL_BIN=`which openssl`
+OPENSSL_CNF=./conf/openssl.cnf
 OPENSSL_CURVE=prime256v1
 MESSAGE="Usage:  sh ${0} [client_name]"
 
